@@ -26,7 +26,8 @@ class CameraInfo(NamedTuple):
     image_name: str
     width: int
     height: int
-    light_dir: np.array
+    envmap: np.array
+    uvmap: np.array
 
 class SceneInfo(NamedTuple):
     point_cloud: BasicPointCloud
@@ -34,6 +35,17 @@ class SceneInfo(NamedTuple):
     test_cameras: list
     nerf_normalization: dict
     ply_path: str
+
+def norm_img(image):
+    min_value = 0.0
+    max_value = 1.0
+
+    image_min = np.min(image)
+    image_max = np.max(image)
+    
+    # Normalize the image to the specified range
+    img = (image - image_min) / (image_max - image_min) 
+    return img
 
 def getNerfppNorm(cam_info):
     def get_center_and_diag(cam_centers):
@@ -199,8 +211,9 @@ def readCamerasFromTransforms(path, transformsfile, white_background, extension=
             image_name = Path(cam_name).stem
             
             
-            image = np.power(np.clip(imread(image_path),0,None),0.45)
-            image = np.clip(imread(image_path),0,None)
+            # image = np.power(np.clip(imread(image_path),0,None),0.45)
+            image = image_path
+            # image = np.clip(imread(image_path),0,None)
             imh = int(frame['h'])
             imw = int(frame['w'])
 
@@ -216,11 +229,23 @@ def readCamerasFromTransforms(path, transformsfile, white_background, extension=
                 Cy = contents['cy']
                 Cx = contents['cx']
 
-            light_dir = np.asarray(frame['light_direction'])
+            # light_dir = np.asarray(frame['light_direction'])
+            try:
+                # envmap = imread(contents['envmap'])
+                envmap = contents['envmap']
+            except KeyError:
+                # envmap = imread(frame['envmap'])
+                envmap = frame['envmap']
+            # envmap = norm_img(envmap)
+
+            if 'uvmap' in frame.keys():
+                uvmap = frame['uvmap']
+            else:
+                uvmap = None
 
             cam_infos.append(CameraInfo(uid=idx, R=R, T=T, FovY=FovY, FovX=FovX,Cx =Cx,Cy=Cy, image=image,
                             image_path=image_path, image_name=image_name, width=imw, height=imh,
-                            light_dir=light_dir))
+                            envmap=envmap,uvmap=uvmap))
             
     return cam_infos
 

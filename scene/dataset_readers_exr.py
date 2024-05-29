@@ -26,6 +26,7 @@ class CameraInfo(NamedTuple):
     image_name: str
     width: int
     height: int
+    uvmap:str
 
 class SceneInfo(NamedTuple):
     point_cloud: BasicPointCloud
@@ -213,9 +214,10 @@ def readCamerasFromTransforms(path, transformsfile, white_background, extension=
             except KeyError:
                 Cy = contents['cy']
                 Cx = contents['cx']
+            uvmap=None
 
             cam_infos.append(CameraInfo(uid=idx, R=R, T=T, FovY=FovY, FovX=FovX,Cx =Cx,Cy=Cy, image=image,
-                            image_path=image_path, image_name=image_name, width=imw, height=imh))
+                            image_path=image_path, image_name=image_name, width=imw, height=imh,uvmap=None))
             
     return cam_infos
 

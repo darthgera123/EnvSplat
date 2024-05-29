@@ -70,6 +70,40 @@ def get_expon_lr_func(
 
     return helper
 
+def get_steplr_lr_func(lr_init, lr_decay_factor, step_size, lr_delay_steps=0, lr_delay_mult=1.0):
+    """
+    Generates a learning rate schedule function that mimics PyTorch's StepLR scheduler,
+    optionally with an initial delay. The learning rate decreases by a factor of `lr_decay_factor`
+    every `step_size` steps.
+
+    Parameters:
+    - lr_init: Initial learning rate.
+    - lr_decay_factor: Factor by which the learning rate is decreased at each step.
+    - step_size: The number of steps between each learning rate decay.
+    - lr_delay_steps: Optional initial period of steps where the learning rate is scaled down.
+    - lr_delay_mult: Multiplier for learning rate during the initial delay period.
+    - max_steps: Total number of steps in the training (used for clipping).
+
+    Returns:
+    - A function that computes the learning rate given the current step.
+    """
+
+    def helper(step):
+        if step < 0:
+            return 0.0
+        # Apply initial delay if specified
+        if lr_delay_steps > 0 and step < lr_delay_steps:
+            delay_rate = lr_delay_mult + (1 - lr_delay_mult) * np.sin(0.5 * np.pi * np.clip(step / lr_delay_steps, 0, 1))
+        else:
+            delay_rate = 1.0
+        # Compute the step LR adjustment
+        lr_step_factor = lr_decay_factor ** (step // step_size)
+        return lr_init * delay_rate * lr_step_factor
+
+    return helper
+
+
+
 def strip_lowerdiag(L):
     uncertainty = torch.zeros((L.shape[0], 6), dtype=torch.float, device="cuda")
 

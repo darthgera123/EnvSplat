@@ -1,0 +1,5 @@
+Observations
+
+1) 70k iterations for rotation,scaling and position
+2) decoder_lr = 1e-3
+3) percep weight = 1e-2

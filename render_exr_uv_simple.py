@@ -110,7 +110,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
         
         imwrite(os.path.join(render_path, '{0:05d}'.format(idx) + ".png"),exr2png(np_render))
         imwrite(os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"),exr2png(np_gt))
-        print(psnr(exr2png(np_render,np_gt)))
+        
         diffuse = rendering['diffuse'].detach().cpu().numpy()
         diffuse = np.clip(diffuse,0,1).reshape(256,256,3)
         diffuse = (diffuse*255).astype('uint8')
